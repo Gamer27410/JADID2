@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>O'rta Osiyo Jadidlari</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      color: #fff;
+    }
+
+    .header {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header h1 {
+      font-size: 1.4rem;
+      color: #f4d03f;
+      text-shadow: 0 0 20px rgba(244,208,63,0.5);
+    }
+
+    .header p {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.6);
+      margin-top: 4px;
+    }
+
+    .back-btn {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: #f4d03f;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+      transition: all 0.2s;
+    }
+
+    .back-btn:hover { background: rgba(255,255,255,0.2); }
+
+    /* ===== JADIDLAR RO'YXATI ===== */
+    #jadidlar-page { padding: 20px; }
+
+    .search-box {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      font-size: 1rem;
+      margin-bottom: 20px;
+      outline: none;
+    }
+
+    .search-box::placeholder { color: rgba(255,255,255,0.4); }
+
+    .jadid-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .jadid-card:hover, .jadid-card:active {
+      background: rgba(244,208,63,0.15);
+      border-color: #f4d03f;
+      transform: translateX(4px);
+    }
+
+    .jadid-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f4d03f, #e67e22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #1a1a2e;
+      flex-shrink: 0;
+    }
+
+    .jadid-info h3 {
+      font-size: 1rem;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .jadid-info p {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .arrow {
+      margin-left: auto;
+      color: rgba(255,255,255,0.3);
+      font-size: 1.2rem;
+    }
+
+    /* ===== JADID TANLANGANDAN KEYIN ===== */
+    #jadid-menu-page { padding: 20px; display: none; }
+
+    .jadid-hero {
+      background: linear-gradient(135deg, rgba(244,208,63,0.15), rgba(230,126,34,0.15));
+      border: 1px solid rgba(244,208,63,0.3);
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .jadid-hero-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f4d03f, #e67e22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #1a1a2e;
+      margin: 0 auto 16px;
+    }
+
+    .jadid-hero h2 {
+      font-size: 1.3rem;
+      color: #f4d03f;
+      margin-bottom: 6px;
+    }
+
+    .jadid-hero p {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .menu-btn {
+      width: 100%;
+      padding: 18px;
+      border-radius: 16px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .menu-btn.bio {
+      background: linear-gradient(135deg, #2ecc71, #27ae60);
+      color: #fff;
+    }
+
+    .menu-btn.life {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: #fff;
+    }
+
+    .menu-btn:hover { transform: scale(1.02); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+
+    .menu-btn .icon { font-size: 1.4rem; }
+
+    /* ===== KONTENT SAHIFASI ===== */
+    #content-page { padding: 20px; display: none; }
+
+    .content-title {
+      font-size: 1.1rem;
+      color: #f4d03f;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .content-text {
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 20px;
+      font-size: 0.95rem;
+      line-height: 1.8;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 20px;
+      white-space: pre-wrap;
+    }
+
+    /* ===== TTS TUGMASI ===== */
+    .tts-section {
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 10px;
+    }
+
+    .tts-label {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .tts-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .tts-btn:hover { transform: scale(1.02); }
+
+    .tts-btn.playing {
+      background: linear-gradient(135deg, #f39c12, #e67e22);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(243,156,18,0.4); }
+      50% { box-shadow: 0 0 0 10px rgba(243,156,18,0); }
+    }
+
+    .tts-progress {
+      margin-top: 10px;
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .tts-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #f4d03f, #e67e22);
+      width: 0%;
+      transition: width 0.3s;
+      animation: loading 2s infinite;
+    }
+
+    @keyframes loading {
+      0% { width: 0%; }
+      50% { width: 70%; }
+      100% { width: 100%; }
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <button class="back-btn" id="back-btn" onclick="goBack()">← Orqaga</button>
+  <h1>📚 O'rta Osiyo Jadidlari</h1>
+  <p id="header-sub">Jadidni tanlang</p>
+</div>
+
+<!-- ===== SAHIFA 1: JADIDLAR RO'YXATI ===== -->
+<div id="jadidlar-page" class="page active">
+  <br>
+  <input class="search-box" type="text" placeholder="🔍 Jadidni qidiring..." oninput="filterJadidlar(this.value)" />
+  <div id="jadidlar-list"></div>
+</div>
+
+<!-- ===== SAHIFA 2: JADID MENYU ===== -->
+<div id="jadid-menu-page" class="page">
+  <div class="jadid-hero">
+    <div class="jadid-hero-avatar" id="hero-avatar"></div>
+    <h2 id="hero-name"></h2>
+    <p id="hero-years"></p>
+  </div>
+  <button class="menu-btn bio" onclick="showContent('bio')">
+    <span class="icon">📖</span>
+    Avtobiografiya
+  </button>
+  <button class="menu-btn life" onclick="showContent('hayot')">
+    <span class="icon">🌟</span>
+    Hayoti va ijodi
+  </button>
+</div>
+
+<!-- ===== SAHIFA 3: KONTENT ===== -->
+<div id="content-page" class="page">
+  <div class="content-title" id="content-title"></div>
+  <div class="content-text" id="content-text"></div>
+
+  <div class="tts-section">
+    <div class="tts-label">🔊 Matnni eshitish</div>
+    <button class="tts-btn" id="tts-btn" onclick="toggleTTS()">
+      <span id="tts-icon">🎧</span>
+      <span id="tts-label">Eshitish</span>
+    </button>
+    <div class="tts-progress" id="tts-progress">
+      <div class="tts-progress-bar"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// JADIDLAR MA'LUMOTLARI — O'ZINGIz TO'LDIRING
+// ============================================================
+const jadidlar = [
+  {
+    id: "behbudi",
+    name: "Mahmudxo'ja Behbudiy",
+    years: "1875 – 1919",
+    initials: "B",
+    bio: `[Bu yerga Behbudiyning avtobiografiyasini kiriting]`,
+    hayot: `[Bu yerga Behbudiyning hayoti va ijodini kiriting]`
+  },
+  {
+    id: "fitrat",
+    name: "Abdurauf Fitrat",
+    years: "1886 – 1938",
+    initials: "F",
+    bio: `[Bu yerga Fitratning avtobiografiyasini kiriting]`,
+    hayot: `[Bu yerga Fitratning hayoti va ijodini kiriting]`
+  },
+  {
+    id: "cholpon",
+    name: "Abdulhamid Cho'lpon",
+    years: "1897 – 1938",
+    initials: "CH",
+    bio: `[Bu yerga Cho'lponning avtobiografiyasini kiriting]`,
+    hayot: `[Bu yerga Cho'lponning hayoti va ijodini kiriting]`
+  },
+  {
+    id: "qodiriy",
+    name: "Abdulla Qodiriy",
+    years: "1894 – 1938",
+    initials: "Q",
+    bio: `[Bu yerga Qodiriyning avtobiografiyasini kiriting]`,
+    hayot: `[Bu yerga Qodiriyning hayoti va ijodini kiriting]`
+  },
+  {
+    id: "avloniy",
+    name: "Abdulla Avloniy",
+    years: "1878 – 1934",
+    initials: "A",
+    bio: `[Bu yerga Avloniyning avtobiografiyasini kiriting]`,
+    hayot: `[Bu yerga Avloniyning hayoti va ijodini kiriting]`
+  },
+  {
+    id: "munavvar",
+    name: "Munavvar Qori Abdurashidxonov",
+    years: "1878 – 1931",
+    initials: "M",
+    bio: `[Bu yerga Munavvar Qorining avtobiografiyasini kiriting]`,
+    hayot: `[Bu yerga Munavvar Qorining hayoti va ijodini kiriting]`
+  },
+  {
+    id: "hamza",
+    name: "Hamza Hakimzoda Niyoziy",
+    years: "1889 – 1929",
+    initials: "H",
+    bio: `[Bu yerga Hamzaning avtobiografiyasini kiriting]`,
+    hayot: `[Bu yerga Hamzaning hayoti va ijodini kiriting]`
+  },
+  {
+    id: "ismoil",
+    name: "Ismoil Gasprinskiy",
+    years: "1851 – 1914",
+    initials: "G",
+    bio: `[Bu yerga Gasprinskiyning avtobiografiyasini kiriting]`,
+    hayot: `[Bu yerga Gasprinskiyning hayoti va ijodini kiriting]`
+  },
+  {
+    id: "sadriddin",
+    name: "Sadriddin Ayniy",
+    years: "1878 – 1954",
+    initials: "S",
+    bio: `[Bu yerga Ayniyning avtobiografiyasini kiriting]`,
+    hayot: `[Bu yerga Ayniyning hayoti va ijodini kiriting]`
+  },
+  {
+    id: "ubaydulla",
+    name: "Ubaydullaxo'ja Asadullaxo'jayev",
+    years: "1878 – 1937",
+    initials: "U",
+    bio: `[Bu yerga Ubaydullaxo'janing avtobiografiyasini kiriting]`,
+    hayot: `[Bu yerga Ubaydullaxo'janing hayoti va ijodini kiriting]`
+  },
+  {
+    id: "nazir",
+    name: "Nazir To'raqulov",
+    years: "1892 – 1937",
+    initials: "N",
+    bio: `[Bu yerga Nazir To'raqulovning avtobiografiyasini kiriting]`,
+    hayot: `[Bu yerga Nazir To'raqulovning hayoti va ijodini kiriting]`
+  },
+  {
+    id: "feruzbek",
+    name: "Feruzbek Qo'qandiy",
+    years: "1840 – 1909",
+    initials: "FK",
+    bio: `[Bu yerga Feruzbek Qo'qandiyning avtobiografiyasini kiriting]`,
+    hayot: `[Bu yerga Feruzbek Qo'qandiyning hayoti va ijodini kiriting]`
+  },
+];
+
+// ============================================================
+// HOLAT
+// ============================================================
+let selectedJadid = null;
+let currentType = null;
+let ttsAudio = null;
+let isPlaying = false;
+let history = ['jadidlar'];
+
+// ============================================================
+// SAHIFALAR
+// ============================================================
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+
+  const backBtn = document.getElementById('back-btn');
+  const headerSub = document.getElementById('header-sub');
+
+  if (pageId === 'jadidlar-page') {
+    backBtn.style.display = 'none';
+    headerSub.textContent = 'Jadidni tanlang';
+  } else if (pageId === 'jadid-menu-page') {
+    backBtn.style.display = 'flex';
+    headerSub.textContent = selectedJadid.name;
+  } else if (pageId === 'content-page') {
+    backBtn.style.display = 'flex';
+    headerSub.textContent = selectedJadid.name;
+  }
+}
+
+function goBack() {
+  stopTTS();
+  history.pop();
+  const prev = history[history.length - 1];
+  showPage(prev === 'jadidlar' ? 'jadidlar-page' : prev === 'menu' ? 'jadid-menu-page' : 'content-page');
+}
+
+// ============================================================
+// JADIDLAR RO'YXATINI CHIQARISH
+// ============================================================
+function renderJadidlar(list) {
+  const container = document.getElementById('jadidlar-list');
+  container.innerHTML = '';
+  list.forEach(jadid => {
+    const card = document.createElement('div');
+    card.className = 'jadid-card';
+    card.innerHTML = `
+      <div class="jadid-avatar">${jadid.initials}</div>
+      <div class="jadid-info">
+        <h3>${jadid.name}</h3>
+        <p>${jadid.years}</p>
+      </div>
+      <span class="arrow">›</span>
+    `;
+    card.onclick = () => selectJadid(jadid);
+    container.appendChild(card);
+  });
+}
+
+function filterJadidlar(query) {
+  const filtered = jadidlar.filter(j =>
+    j.name.toLowerCase().includes(query.toLowerCase())
+  );
+  renderJadidlar(filtered);
+}
+
+// ============================================================
+// JADID TANLASH
+// ============================================================
+function selectJadid(jadid) {
+  selectedJadid = jadid;
+  document.getElementById('hero-avatar').textContent = jadid.initials;
+  document.getElementById('hero-name').textContent = jadid.name;
+  document.getElementById('hero-years').textContent = jadid.years;
+  history.push('menu');
+  showPage('jadid-menu-page');
+}
+
+// ============================================================
+// KONTENT KO'RSATISH
+// ============================================================
+function showContent(type) {
+  currentType = type;
+  stopTTS();
+
+  const title = type === 'bio'
+    ? `📖 ${selectedJadid.name} — Avtobiografiya`
+    : `🌟 ${selectedJadid.name} — Hayoti va ijodi`;
+
+  const text = type === 'bio' ? selectedJadid.bio : selectedJadid.hayot;
+
+  document.getElementById('content-title').textContent = title;
+  document.getElementById('content-text').textContent = text;
+
+  document.getElementById('tts-btn').className = 'tts-btn';
+  document.getElementById('tts-icon').textContent = '🎧';
+  document.getElementById('tts-label').textContent = 'Eshitish';
+  document.getElementById('tts-progress').style.display = 'none';
+
+  history.push('content-page');
+  showPage('content-page');
+}
+
+// ============================================================
+// TEXT-TO-SPEECH (Google TTS)
+// ============================================================
+function toggleTTS() {
+  if (isPlaying) {
+    stopTTS();
+  } else {
+    startTTS();
+  }
+}
+
+function startTTS() {
+  const text = currentType === 'bio' ? selectedJadid.bio : selectedJadid.hayot;
+
+  if (!text || text.includes('[Bu yerga')) {
+    alert('⚠️ Matn hali kiritilmagan!');
+    return;
+  }
+
+  stopTTS();
+
+  // Google TTS API — o'zbek tilida
+  const maxLen = 200;
+  const chunks = splitText(text, maxLen);
+  playChunks(chunks, 0);
+}
+
+function splitText(text, maxLen) {
+  const chunks = [];
+  const sentences = text.split(/(?<=[.!?])\s+/);
+  let current = '';
+  for (const s of sentences) {
+    if ((current + ' ' + s).length > maxLen) {
+      if (current) chunks.push(current.trim());
+      current = s;
+    } else {
+      current += ' ' + s;
+    }
+  }
+  if (current.trim()) chunks.push(current.trim());
+  return chunks.length > 0 ? chunks : [text.substring(0, maxLen)];
+}
+
+function playChunks(chunks, index) {
+  if (index >= chunks.length) {
+    stopTTS();
+    return;
+  }
+
+  isPlaying = true;
+  updateTTSUI(true);
+
+  const encodedText = encodeURIComponent(chunks[index]);
+  const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=uz&client=tw-ob`;
+
+  ttsAudio = new Audio(url);
+  ttsAudio.crossOrigin = "anonymous";
+
+  ttsAudio.onended = () => {
+    if (isPlaying) playChunks(chunks, index + 1);
+  };
+
+  ttsAudio.onerror = () => {
+    // Fallback: Web Speech API
+    speakWithWebSpeech(chunks.join(' '));
+  };
+
+  ttsAudio.play().catch(() => {
+    speakWithWebSpeech(chunks.join(' '));
+  });
+}
+
+function speakWithWebSpeech(text) {
+  if (!('speechSynthesis' in window)) {
+    alert("Kechirasiz, brauzeringiz ovoz funksiyasini qo'llab-quvvatlamaydi.");
+    stopTTS();
+    return;
+  }
+
+  isPlaying = true;
+  updateTTSUI(true);
+
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'uz-UZ';
+  utterance.rate = 0.9;
+  utterance.pitch = 1;
+
+  utterance.onend = () => stopTTS();
+  utterance.onerror = () => stopTTS();
+
+  window.speechSynthesis.speak(utterance);
+}
+
+function stopTTS() {
+  isPlaying = false;
+  if (ttsAudio) {
+    ttsAudio.pause();
+    ttsAudio.src = '';
+    ttsAudio = null;
+  }
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+  updateTTSUI(false);
+}
+
+function updateTTSUI(playing) {
+  const btn = document.getElementById('tts-btn');
+  const icon = document.getElementById('tts-icon');
+  const label = document.getElementById('tts-label');
+  const progress = document.getElementById('tts-progress');
+
+  if (playing) {
+    btn.className = 'tts-btn playing';
+    icon.textContent = '⏹';
+    label.textContent = 'To\'xtatish';
+    progress.style.display = 'block';
+  } else {
+    btn.className = 'tts-btn';
+    icon.textContent = '🎧';
+    label.textContent = 'Eshitish';
+    progress.style.display = 'none';
+  }
+}
+
+// ============================================================
+// TELEGRAM WEB APP
+// ============================================================
+if (window.Telegram && window.Telegram.WebApp) {
+  window.Telegram.WebApp.ready();
+  window.Telegram.WebApp.expand();
+}
+
+// Sahifani yuklash
+renderJadidlar(jadidlar);
+</script>
+</body>
+</html>
